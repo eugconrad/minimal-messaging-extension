@@ -9,7 +9,7 @@ buttonToServiceWorker.addEventListener("click", async () => {
   log(
     `In popup, button to send message to service worker was clicked, about to run sendMessage`
   );
-  const response = chrome.runtime.sendMessage({
+  const response = await chrome.runtime.sendMessage({
     to: "service-worker",
     text: "hello from popup",
   });
@@ -19,13 +19,16 @@ buttonToServiceWorker.addEventListener("click", async () => {
 const buttonToContentScript = document.querySelector(
   "button.to-content-script"
 );
-buttonToContentScript.addEventListener("click", async () => {
-  log(
-    `In popup, button to send message to content script was clicked, about to run sendMessage`
-  );
-  const response = await chrome.runtime.sendMessage({
-    to: "content-script",
-    text: "hello from popup",
+buttonToContentScript.addEventListener('click', () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    log(
+      `In popup, button to send message to content script was clicked, about to run sendMessage`
+    );
+    chrome.tabs.sendMessage(tabs[0].id, {
+      to: "content-script",
+      text: "hello from popup",
+    }, (response) => {
+      log(`Got response`, response.text);
+    });
   });
-  log(`Got response`, response.text);
 });
